@@ -1,52 +1,19 @@
-1\. The secret still exists in the layer created by:
+# Chaos Task Answers
 
-&#x20;  RUN echo "AZURE\_CLIENT\_SECRET=my-super-secret-abc123" > /tmp/dev.env
+1. The secret still exists in the layer created by:
 
+RUN echo "AZURE_CLIENT_SECRET=my-super-secret-abc123" > /tmp/dev.env
 
+Even though the file was deleted later, the original layer still contains the secret.
 
-2\. Docker history shows that the file was deleted later, but deleting a file does not remove it from previous image layers.
+2. What does docker history tell you about the RUN rm command?
 
+Docker history shows that the file was deleted in a later layer. However, deleting a file does not remove it from previous layers because Docker layers are immutable. The secret remains accessible in the image history.
 
+3. What is the correct way to handle build-time secrets?
 
-3\. Docker layers are immutable. Secrets written during build remain in the image history even after deletion.
+The correct approach is to use Docker BuildKit secrets (--secret) or a secrets manager. Secrets should never be written into Dockerfile layers because they become part of the image history.
 
+4. What would happen if this image were pushed to ACR?
 
-
-4\. If pushed to ACR, the secret could be exposed to anyone with access to the image. First action: revoke/rotate the credential and rebuild the image without embedding secrets.
-
-
-
-1\. The secret still exists in the layer created by:
-
-&#x20;  RUN echo "AZURE\_CLIENT\_SECRET=my-super-secret-abc123" > /tmp/dev.env
-
-
-
-2\. Docker history shows both commands: the secret was created and later deleted. The deletion does not remove the secret from the previous layer.
-
-
-
-3\. The correct way is to use Docker BuildKit secrets, for example --secret. Secrets should not be written into Dockerfile layers.
-
-
-
-4\. If this image were pushed to ACR, the secret could be exposed. The first action would be to revoke/rotate the credential, delete the image, and rebuild it safely.
-
-
-
-1\. The secret still exists in the layer created by:
-
-&#x20;  RUN echo "AZURE\_CLIENT\_SECRET=my-super-secret-abc123" > /tmp/dev.env
-
-
-
-2\. Docker history shows that the file was deleted later, but deleting a file does not remove it from previous image layers.
-
-
-
-3\. Docker layers are immutable. Secrets written during build remain in the image history even after deletion.
-
-
-
-4\. If pushed to ACR, the secret could be exposed to anyone with access to the image. First action: revoke/rotate the credential and rebuild the image without embedding secrets.
-
+Anyone with access to the image could potentially recover the secret from the image layers. The first action would be to revoke or rotate the exposed credential, remove the vulnerable image, and rebuild the image using secure secret handling methods.
